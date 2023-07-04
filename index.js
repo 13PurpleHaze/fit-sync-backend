@@ -1,6 +1,5 @@
-import express from "express";
+import app from "./src/app.js";
 
-const app = express();
-app.listen(() => {
+app.listen(8080, () => {
     console.log("...");
 });
