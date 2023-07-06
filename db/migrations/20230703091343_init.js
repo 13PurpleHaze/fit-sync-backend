@@ -7,7 +7,7 @@ export const up = function(knex) {
         .createTable('exercises', function (table) {
             table.bigIncrements('exercise_id');
             table.string('title', 255).notNullable();
-            table.boolean('isStatic').defaultTo(false);
+            table.boolean('is_static').defaultTo(false);
             table.string('img', 255);
             table.timestamps(true, true);
         })
@@ -17,6 +17,7 @@ export const up = function(knex) {
             table.string('sur_name').notNullable();
             table.integer('age').notNullable();
             table.boolean('gender').defaultTo(true);
+            table.boolean('is_admin').defaultTo(false);
             table.timestamps(true, true);
         })
         .createTable('user_details', function (table) {
@@ -27,7 +28,8 @@ export const up = function(knex) {
         })
         .createTable('workouts', function (table) {
             table.bigIncrements('workout_id');
-            table.string('title');
+            table.string('title').notNullable();
+            table.bigInteger('user_id').references('user_id').inTable('users');
             table.timestamps(true, true);
         })
         .createTable('workout_exercises', function (table) {
@@ -35,14 +37,18 @@ export const up = function(knex) {
             table.bigInteger('exercise_id').references('exercise_id').inTable('exercises').notNullable();
             table.primary(['workout_id', 'exercise_id']);
         })
-        .createTable('workout_users', function (table) {
-            table.bigInteger('workout_id').references('workout_id').inTable('workouts').notNullable();
+        .createTable('sessions', function (table) {
+            table.bigIncrements('session_id');
+            table.bigInteger('workout_id').references('workout_id').inTable('workouts');
+        })
+        .createTable('session_users', function (table) {
+            table.bigInteger('session_id').references('session_id').inTable('sessions').notNullable();
             table.bigInteger('user_id').references('user_id').inTable('users').notNullable();
-            table.primary(['workout_id', 'user_id']);
+            table.primary(['session_id', 'user_id']);
         })
         .createTable('messages', function (table) {
             table.bigIncrements('message_id');
-            table.bigInteger('workout_id').references('workout_id').inTable('workouts').notNullable();
+            table.bigInteger('session_id').references('session_id').inTable('sessions').notNullable();
             table.bigInteger('user_id').references('user_id').inTable('users').notNullable();
             table.text('text');
             table.timestamps(true, true);
@@ -56,7 +62,8 @@ export const up = function(knex) {
 export const down = function(knex) {
     return knex.schema
         .dropTable('messages')
-        .dropTable('workout_users')
+        .dropTable('session_users')
+        .dropTable('sessions')
         .dropTable('workout_exercises')
         .dropTable('workouts')
         .dropTable('user_details')
