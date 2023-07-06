@@ -1,4 +1,5 @@
 import db from "../db.js";
+import { BadRequest } from "../errors/BadRequest.js";
 
 class ExerciseDAL {
     get = async () => {
@@ -7,7 +8,10 @@ class ExerciseDAL {
     }
 
     find = async (id) => {
-        const exercise = await db('exercises').where({exercise_id: id});
+        const exercise = await db('exercises').where({exercise_id: id}).first();
+        if(!exercise) {
+            throw new BadRequest('Incorrect id');
+        }
         return exercise;
     }
 
@@ -15,12 +19,20 @@ class ExerciseDAL {
         return await db('exercises').insert(exercise);
     }
 
-    update = async (oldExs, newExs) => {
-        return await db('exercises').where(oldExs).update(newExs);
+    update = async (id, newExs) => {
+        const exercise = await db('exercises').where({exercise_id: id});
+        if(!exercise) {
+            throw new BadRequest('Incorrect id');
+        }
+        return await db('exercises').where({exercise_id: id}).update(newExs);
     }
 
-    delete = async (exercise) => {
-        return await db('exercises').where(exercise).delete();
+    delete = async (id) => {
+        const exercise = await db('exercises').where({exercise_id: id});
+        if(!exercise) {
+            throw new BadRequest('Incorrect id');
+        }
+        return await db('exercises').where({exercise_id: id}).delete();
     }
 }
 

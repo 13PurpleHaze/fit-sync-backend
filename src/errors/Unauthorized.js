@@ -1,4 +1,4 @@
-class Unauthorized extends Error {
+export class Unauthorized extends Error {
     constructor() {
         super('Unauthorized');
     }
