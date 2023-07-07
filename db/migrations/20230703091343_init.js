@@ -18,6 +18,7 @@ export const up = function(knex) {
             table.integer('age').notNullable();
             table.boolean('gender').defaultTo(true);
             table.boolean('is_admin').defaultTo(false);
+            table.boolean('is_block').defaultTo(false);
             table.timestamps(true, true);
         })
         .createTable('user_details', function (table) {
