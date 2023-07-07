@@ -34,6 +34,15 @@ class UserDAL {
             return user;
         }
     }
+
+    changeBlockStatus = async (user_id, status = false) => {
+        const user = await db('users').where('user_id', user_id).first();
+        if(!user) {
+            throw new BadRequest('There is no user with this login');
+        } else {
+            return await db('users').where('user_id', user_id).update('is_block', status);
+        }
+    }
 }
 
 export default UserDAL;
