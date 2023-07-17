@@ -5,7 +5,7 @@ import BaseDAL from "../base/BaseDAL.js";
 
 class UserDAL extends BaseDAL {
     create = async (data) => {
-        const [user] = await db('users').where('login', data.login);
+        const [user] = await db('users').where({login: data.login});
         if(user) {
             throw new BadRequest('There is another user with this login');
         } else {

@@ -27,10 +27,10 @@ class WorkoutDAL extends BaseDAL {
 
     find = async (workoutId, userId) => {
         const [workout] = await this.get({
-            filters: [{['workouts.workout_id']: workoutId}, {user_id: userId}]
+            filters: [{['workouts.workout_id']: workoutId}]
         });
         if(!workout) {
-            throw new BadRequest(`There is no workout with id=${workoutId} and userId=${userId}`);
+            throw new BadRequest(`There is no workout with id=${workoutId}`);
         }
         return workout;
     }
@@ -48,6 +48,7 @@ class WorkoutDAL extends BaseDAL {
                 db.raw(`json_agg(
                             json_build_object(
                                 'exercise_id', exercises.exercise_id,
+                                'is_static', exercises.is_static,
                                 'title', exercises.title,
                                 'img', exercises.img,
                                 'reps', workout_exercises.reps

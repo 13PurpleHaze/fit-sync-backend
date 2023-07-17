@@ -12,7 +12,7 @@ const exerciseController = new ExerciseController();
 
 router.get('/exercises', auth, catcher(exerciseController.get));
 router.get('/exercises/:id', auth, findRules, validate, catcher(exerciseController.find));
-router.post('/exercises', auth, admin, upload.single('img'), createRules, validate, catcher(exerciseController.create));
+router.post('/exercises', auth, admin, upload.single('img') ,createRules, validate, catcher(exerciseController.create));
 router.patch('/exercises/:id', auth, admin, upload.single('img'), updateRules, validate, catcher(exerciseController.update));
 router.delete('/exercises/:id', auth, admin, deleteRules, validate, catcher(exerciseController.delete));
 

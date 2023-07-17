@@ -1,22 +1,21 @@
-// Update with your config settings.
+import 'dotenv/config';
 
-/**
- * @type { Object.<string, import("knex").Knex.Config> }
- */
 export default{
-  development: {
-    client: 'postgresql',
+  client: process.env.DB_CLIENT,
     connection: {
-      database: 'fit_sync_dev',
-      user:     'postgres',
-      password: 'admin'
+        database: process.env.DB_NAME,
+        user:     proccess.env.DB_USER,
+        password: procccess.env.DB_PASSWORD
+    },
+    pool: {
+        min: process.env.DB_MIN_POOL,
+        max: process.env.DB_MAX_POOL
     },
     migrations: {
-      tableName: 'migrations',
-      directory: './db/migrations'
+        tableName: 'migrations',
+        directory: './db/migrations'
     },
     seeds: {
-      directory: './db/seeds'
+        directory: './db/seeds'
     }
-  }
 };

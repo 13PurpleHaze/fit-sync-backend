@@ -20,7 +20,7 @@ class WorkoutController extends BaseContoller {
 
     find = async (req, res) => {
         const workoutId = req.params.id;
-        const workout = await this.workouts.find(workoutId);
+        const workout = await this.workouts.find(workoutId, req.user.user_id);
         res.status(200).json(workout);
     }
 
@@ -46,7 +46,7 @@ class WorkoutController extends BaseContoller {
             title,
             exercises,
         } = req.body;
-        await this.workouts.update(req.params.id, {title, exercises, userId: req.params.id});
+        await this.workouts.update(req.params.id, {title, exercises, userId: req.user.user_id});
         res.status(204).send();
     }
 
