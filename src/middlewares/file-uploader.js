@@ -3,15 +3,7 @@ import multer from "multer";
 import path from "path";
 import { BadRequest } from "../errors/BadRequest.js";
 
-const storage = multer.diskStorage({
-    destination(req, file, cb) {
-        const p = path.resolve('src/storage/');
-        cb(null, p);
-    },
-    filename(req, file, cb) {
-        cb(null, `${moment().format('DDMMYY-HHmmss-SSS')}-${file.originalname}`);
-    }
-})
+const storage = multer.memoryStorage()
 
 const types = ['image/jpg', 'image/jpeg', 'image/svg+xml', 'image/png'];
 
