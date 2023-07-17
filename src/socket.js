@@ -1,35 +1,40 @@
 import { Server } from "socket.io";
-import { wrapper } from "./utils/wrapper.js";
 import { auth } from "./middlewares/auth.js";
 import Session from "./sockets/session.js";
+import ActivePlayers from "./sockets/active-players.js";
+import { createAdapter } from "@socket.io/redis-adapter";
+import broker from "./broker.js";
 
-export const io = (server) => {
-
+export const initSockets = (server) => {
     const io = new Server(
         server,
         {
           transports: ['websocket']
         }
       );
-    /*io.use((socket, next) => {
-        console.log('проверка')
+
+    io.adapter(createAdapter(broker.pub, broker.sub))
+    io.use((socket, next) => {
         const req = {headers: { authorization: `Bearer ${socket.handshake?.auth.token}` }}
-            auth(req, null,next);
-            if (!socket.request?.user){
-                console.log('ДИСКОНЕКТ')
-                socket.disconnect();
-            } else {
-                next();
-            }
-        }
-    );*/
+        auth(req, null, next);
+        if (!req?.user){
+            socket.disconnect();
+        } else {
+            socket.user = req.user;
+            next();
+        }    
+    });
     
     const session = new Session(io); 
-
+    const players = new ActivePlayers(io);
     
     io.on("connection",  async (socket) => {
-        console.log('connection');
-        await session.onConnection(socket);
+        await Promise.all(
+            [
+                await session.onConnection(socket),
+                await players.onConnection(socket),
+            ]
+        )
     });
 
     return io;

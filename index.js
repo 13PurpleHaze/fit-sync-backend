@@ -1,5 +1,14 @@
 import server from "./src/app.js";
 
-server.listen(8080, () => {
-    console.log("...");
+process.on('SIGINT', async () => {
+    try {
+        await server.close();
+        process.exit(0);
+    } catch (err) {
+        process.exit(1);
+    }
+})
+
+server.listen(process.env.APP_PORT || 8080, () => {
+    process.send('ready');
 });

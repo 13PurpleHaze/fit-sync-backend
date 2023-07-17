@@ -41,7 +41,7 @@ export const up = function(knex) {
         })
         .createTable('sessions', function (table) {
             table.bigIncrements('session_id');
-            table.bigInteger('workout_id').references('workout_id').inTable('workouts');
+            table.bigInteger('workout_id').references('workout_id').inTable('workouts').onDelete('CASCADE');
         })
         .createTable('session_users', function (table) {
             table.bigInteger('session_id').references('session_id').inTable('sessions').notNullable();

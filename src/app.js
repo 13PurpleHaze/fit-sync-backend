@@ -4,30 +4,16 @@ import cors from "cors";
 import { handler } from "./middlewares/errors-handler.js";
 import path from "path";
 import cookieParser from "cookie-parser";
-import { io } from "./socket.js";
+import { initSockets } from "./socket.js";
 import http from "http";
-import winston from "winston";
-
+import 'dotenv/config';
+import logger from "./logger.js";
 
 const app = express();
 
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => {
-      return `${timestamp} ${level}: ${message}`;
-    })
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/app.log" }),
-  ],
-});
-
 app.use((req, res, next) => {
   logger.info(
-    `${req.method} ${req.originalUrl} - ${req.ip} - ${new Date().toISOString()}`
+    `${req.method} ${req.originalUrl} - ${req.get('User-Agent')} - ${req.ip} - ${new Date().toISOString()}`
   );
   next();
 });
@@ -37,15 +23,15 @@ app.use(cors({
     credentials: true,
     exposedHeaders: ["set-cookie"],
   }));
+
 app.use(express.json());
-app.use(cookieParser("secret"));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use("/api/storage", express.static(path.resolve('src/storage')));
 app.use("/api", router);
 app.use(handler);
 
 const server = http.createServer(app)
-const socket = io(server);
-
+const socket = initSockets(server);
 
 export default server;

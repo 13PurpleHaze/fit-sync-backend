@@ -41,3 +41,7 @@ export const updateRules = [
 export const deleteRules = [
     param('id').isInt().withMessage('Param id must be an integer'),
 ];
+
+export const findRules = [
+    param('id').isInt().withMessage('Param id must be an integer'),
+]

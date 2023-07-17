@@ -1,18 +1,19 @@
 import knex from "knex";
+import 'dotenv/config';
 
 export default knex(
 {
-    client: 'postgresql',
+    client: process.env.DB_CLIENT,
     connection: {
-    database: 'fit_sync_dev',
-    user:     'postgres',
-    password: 'admin'
+        database: process.env.DB_NAME,
+        user:     process.env.DB_USER,
+        password: process.env.DB_PASSWORD
     },
     migrations: {
-    tableName: 'migrations',
-    directory: './db/migrations'
+        tableName: 'migrations',
+        directory: './db/migrations'
     },
     seeds: {
-    directory: './db/seeds'
+        directory: './db/seeds'
     }
 });
