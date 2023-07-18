@@ -48,8 +48,10 @@ class AuthController {
         const [user] = await this.users.get({
             filters: [{login}]
         });
-        if(!bcrypt.compare(String(password), user.password)) {
-            throw new BadRequest('Wrong password');
+    
+        
+        if(!user || !(await bcrypt.compare(String(password), user.password))) {
+            throw new BadRequest('Wrong password or login');
         }
 
         const tokens = this.sign({user_id: user.user_id, role_id: user.role_id, login: user.login});
@@ -66,7 +68,7 @@ class AuthController {
     }
 
     logout = async (req, res) => {
-        await client.del(req.user.user_id);
+        await broker.pub.hDel('refreshToken', req.user.user_id);
         res.clearCookie('refreshToken');
         res.status(200).send();
     }
