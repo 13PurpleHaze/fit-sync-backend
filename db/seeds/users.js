@@ -1,12 +1,8 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> } 
- */
 export const seed = async function(knex) {
   await knex('users').del()
   await knex('users').insert([
-    {first_name: 'Nikita1', sur_name: "Ivanov", age: 20, gender: true, login: 'nikita1', password: '$2b$08$nSVHurQqTRi28RZYfen7COI2GVrY4oF7sHrxdAVfXGSoxYVvroajO'},
-    {first_name: 'Nikita2', sur_name: "Ivanov", age: 34, gender: true, login: 'nikita2', password: '$2b$08$nSVHurQqTRi28RZYfen7COI2GVrY4oF7sHrxdAVfXGSoxYVvroajO'},
+    {first_name: 'Nikita1', sur_name: "Ivanov", age: 20, gender: true, role_id: '2', login: 'nikita1', password: '$2b$08$nSVHurQqTRi28RZYfen7COI2GVrY4oF7sHrxdAVfXGSoxYVvroajO'},
+    {first_name: 'Nikita2', sur_name: "Ivanov", age: 34, gender: true, role_id: '2', login: 'nikita2', password: '$2b$08$nSVHurQqTRi28RZYfen7COI2GVrY4oF7sHrxdAVfXGSoxYVvroajO'},
     {first_name: 'Nikita3', sur_name: "Ivanov", age: 20, gender: false, login: 'nikita3', password: '$2b$08$nSVHurQqTRi28RZYfen7COI2GVrY4oF7sHrxdAVfXGSoxYVvroajO'},
     {first_name: 'Nikita4', sur_name: "Ivanov", age: 51, gender: false, login: 'nikita4', password: '$2b$08$nSVHurQqTRi28RZYfen7COI2GVrY4oF7sHrxdAVfXGSoxYVvroajO'},
     {first_name: 'Nikita5', sur_name: "Ivanov", age: 15, gender: true, login: 'nikita5', password: '$2b$08$nSVHurQqTRi28RZYfen7COI2GVrY4oF7sHrxdAVfXGSoxYVvroajO'},
