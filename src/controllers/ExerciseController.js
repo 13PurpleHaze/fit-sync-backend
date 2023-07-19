@@ -16,7 +16,7 @@ class ExerciseController extends BaseContoller {
             is_static: req.body.is_static??false,
             img: req.file,
         }
-
+        
         const imgName = generateRandomName();
         await this.storage.create(imgName, data.img);
 

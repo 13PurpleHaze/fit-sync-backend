@@ -1,5 +1,6 @@
 import { body, param } from "express-validator";
 import { BadRequest } from "../errors/BadRequest.js";
+import db from "../db.js";
 
 export const createRules = [
     body('title').notEmpty().withMessage('Field title is required').isLength({max: 255}).withMessage('Max length of field title is 255'),
