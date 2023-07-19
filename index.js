@@ -1,8 +1,15 @@
 import server from "./src/app.js";
+import db from "./src/db.js";
+import broker from "./src/broker.js";
 
 process.on('SIGINT', async () => {
     try {
-        await server.close();
+        await Promise.all([
+            await server.close(),
+            await db.destroy(),
+            await broker.pub.disconnect(),
+            await broker.sub.disconnect(),
+        ]);
         process.exit(0);
     } catch (err) {
         process.exit(1);

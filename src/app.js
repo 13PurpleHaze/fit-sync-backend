@@ -32,6 +32,6 @@ app.use("/api", router);
 app.use(handler);
 
 const server = http.createServer(app)
-const socket = initSockets(server);
+initSockets(server);
 
 export default server;

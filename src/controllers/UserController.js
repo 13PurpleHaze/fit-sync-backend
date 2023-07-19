@@ -1,21 +1,25 @@
 import BaseContoller from "../base/BaseController.js";
+import broker from "../broker.js";
 import UserDAL from "../data-access-layer/UserDAL.js";
 
 class UserControlelr extends BaseContoller {
     constructor() {
         super();
         this.users = new UserDAL();
+        this.broker = broker;
     }
 
     block = async (req, res) => {
         const userId = req.params.id;
         await this.users.changeBlockStatus(userId, false);
+        this.broker.pub.hDel('refreshTokens', userId)
         res.status(204).send();
     }
     
     unblock = async (req, res) => {
         const userId = req.params.id;
         await this.users.changeBlockStatus(userId, true);
+        this.broker.pub.hDel('refreshTokens', userId)
         res.status(204).send();
     }
 

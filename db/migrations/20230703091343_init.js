@@ -34,18 +34,21 @@ export const up = function(knex) {
             table.timestamps(true, true);
         })
         .createTable('workout_exercises', function (table) {
-            table.bigInteger('workout_id').references('workout_id').inTable('workouts').notNullable();
-            table.bigInteger('exercise_id').references('exercise_id').inTable('exercises').notNullable();
+            table.bigInteger('workout_id').references('workout_id').inTable('workouts').onUpdate('CASCADE').onDelete('CASCADE').notNullable();
+            table.bigInteger('exercise_id').references('exercise_id').inTable('exercises').onUpdate('CASCADE').onDelete('CASCADE').notNullable();
             table.integer('reps').notNullable();
             table.primary(['workout_id', 'exercise_id']);
         })
         .createTable('sessions', function (table) {
             table.bigIncrements('session_id');
-            table.bigInteger('workout_id').references('workout_id').inTable('workouts').onDelete('CASCADE');
+            table.bigInteger('workout_id').references('workout_id').inTable('workouts').onDelete('CASCADE').onUpdate('CASCADE');
         })
         .createTable('session_users', function (table) {
-            table.bigInteger('session_id').references('session_id').inTable('sessions').notNullable();
+            table.bigInteger('session_id').references('session_id').inTable('sessions').notNullable().onDelete('CASCADE').onUpdate('CASCADE');
             table.bigInteger('user_id').references('user_id').inTable('users').notNullable();
+            table.timestamp('date_start');
+            table.timestamp('date_end');
+            table.boolean('is_finished').defaultTo(false);
             table.primary(['session_id', 'user_id']);
         })
         .createTable('messages', function (table) {
@@ -57,9 +60,9 @@ export const up = function(knex) {
         })
         .createTable('user_exercises', function (table) {
             table.bigIncrements('user_exercise_id');
-            table.bigInteger('session_id').references('session_id').inTable('sessions').notNullable();
+            table.bigInteger('session_id').references('session_id').inTable('sessions').notNullable().onDelete('CASCADE').onUpdate('CASCADE');
             table.bigInteger('user_id').references('user_id').inTable('users').notNullable();
-            table.bigInteger('exercise_id').references('exercise_id').inTable('exercises').notNullable();
+            table.bigInteger('exercise_id').references('exercise_id').inTable('exercises').notNullable().onDelete('CASCADE').onUpdate('CASCADE');
             table.integer('reps').notNullable();
             table.timestamps(true, true);
         });
