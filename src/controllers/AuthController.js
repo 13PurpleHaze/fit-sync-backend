@@ -54,7 +54,11 @@ class AuthController {
             throw new BadRequest('Wrong password or login');
         }
 
-        const tokens = this.sign({user_id: user.user_id, role_id: user.role_id, login: user.login});
+        if(!user.status) {
+            throw new BadRequest('You are blocked');
+        }
+
+        const tokens = this.sign({user_id: user.user_id, role_id: user.role_id, login: user.login, status: user.status});
         await broker.pub.hSet('refreshTokens', { [user.user_id]: tokens.refreshToken});
         
         res.cookie("refreshToken", tokens.refreshToken, {
@@ -68,7 +72,7 @@ class AuthController {
     }
 
     logout = async (req, res) => {
-        await broker.pub.hDel('refreshToken', req.user.user_id);
+        await broker.pub.hDel('refreshTokens', req.user.user_id);
         res.clearCookie('refreshToken');
         res.status(200).send();
     }
@@ -76,19 +80,28 @@ class AuthController {
     refresh = async (req, res) => {
         const {refreshToken} = req.signedCookies;
 
+        console.log(refreshToken, 'refresh')
         if(!refreshToken) {
             throw new Unauthorized();
         }
 
         const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
+        console.log(payload);
+        if(!payload.status) {
+            throw new Unauthorized();
+        }
+
         const oldRefreshToken = await broker.pub.hGet('refreshTokens', payload.user_id);
 
+        console.log('old', oldRefreshToken)
+        console.log('tr', refreshToken);
+        
         if(!oldRefreshToken || oldRefreshToken !== refreshToken) {
             throw new Unauthorized();
         }
 
-        const tokens = this.sign({user_id: payload.user_id, role_id: payload.role_id, login: payload.login});
+        const tokens = this.sign({user_id: payload.user_id, role_id: payload.role_id, login: payload.login, status: payload.status});
         await broker.pub.hSet('refreshTokens', { [payload.user_id]: tokens.refreshToken});
         
         res.clearCookie('refreshToken');
