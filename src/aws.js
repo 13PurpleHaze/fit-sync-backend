@@ -1,5 +1,5 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import 'dotenv/config';
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import "dotenv/config";
 
 const accessKeyId = process.env.YANDEX_USER_KEY;
 const secretAccessKey = process.env.YANDEX_USER_SECRET_KEY;

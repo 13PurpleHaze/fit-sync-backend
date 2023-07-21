@@ -1,5 +1,5 @@
-import { createClient } from 'redis';
-import 'dotenv/config';
+import { createClient } from "redis";
+import "dotenv/config";
 
 const pub = createClient({url: process.env.REDIS_URL});
 const sub = pub.duplicate();

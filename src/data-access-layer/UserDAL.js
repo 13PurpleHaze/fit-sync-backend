@@ -12,7 +12,7 @@ class UserDAL extends BaseDAL {
             const [user] = await db('users').insert({
                 ...data,
                 password: await bcrypt.hash(data.password, 8)
-            }).returning("*");
+            }).returning('*');
             return user;
         }
     }

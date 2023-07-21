@@ -22,15 +22,8 @@ export const initSockets = (server) => {
     const session = new Session(io); 
     const users = new Users(io);
     
-    io.on("connection",  async (socket) => {
+    io.on('connection',  async (socket) => {
         session.onConnection(socket);
         users.onConnection(socket);
     });
-}
-
-const validateSocket = (socket) => {
-    if(socket.request.user.exp  < (new Date().getTime()/1000)) {
-        socket.disconnect();
-        
-    }
 }

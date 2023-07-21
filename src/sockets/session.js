@@ -3,6 +3,7 @@ import WorkoutDAL from "../data-access-layer/WorkoutDAL.js";
 import MessageDAL from "../data-access-layer/MessageDAL.js";
 import UserDAL from "../data-access-layer/UserDAL.js";
 import ActiveUsers from "./users.js";
+import db from "../db.js";
 
 class Session {
     constructor(io) {
@@ -18,7 +19,7 @@ class Session {
         socket.on('session:create', async (workout) => {
             const _workout = await this.workouts.find(workout.workout_id, socket.user.user_id);
             if(!_workout) {
-                socket.emit('error', {error: `Тренировки ${workout.workout_id} не существует`});
+                socket.emit('error', {error: `Workout ${workout.workout_id} does not exists`});
                 return;
             }
             const session = await this.sessions.create({...workout, userId: socket.user.user_id});
@@ -48,9 +49,7 @@ class Session {
             this.io.to(`session#${session.session_id}`).emit('message:sent', {...message, user: socket.user});
         });
         socket.on('disconnect', async () => {
-            console.log('diss')
-            // find sessions with curr user
-            // if found and it not finished -> finished
+            await db('session_users').where({user_id: socket.user.user_id, is_finished: false}).update({ date_start: new Date(), date_end: new Date(), is_finished: true});
             socket.emit('session:finished');
         })
     }

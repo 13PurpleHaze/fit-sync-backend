@@ -3,7 +3,6 @@ import WorkoutDAL from "../data-access-layer/WorkoutDAL.js";
 import BaseContoller from "../base/BaseController.js";
 import SessionDAL from "../data-access-layer/SessionDAL.js";
 import YandexS3 from "../services/YandexS3.js";
-import db from "../db.js";
 
 class WorkoutController extends BaseContoller {
     constructor() {
@@ -57,38 +56,11 @@ class WorkoutController extends BaseContoller {
     }
 
     getHistory = async (req, res) => {
-        const data = await db.select(
-            'su.session_id',
-            'su.date_start',
-            'su.date_end',
-            'w.title',
-            db.raw(
-              `json_agg(json_build_object(
-                'title', e.title, 
-                'img', e.img,
-                'user_reps', ue.reps, 
-                'workout_reps', we.reps,
-                'is_static', e.is_static
-                )) AS exercises`
-            )
-          )
-          .from('session_users AS su')
-          .join('sessions AS s', 's.session_id', '=', 'su.session_id')
-          .join('workouts AS w', 's.workout_id', '=', 'w.workout_id')
-          .join('user_exercises AS ue', function () {
-            this.on('su.session_id', '=', 'ue.session_id').andOn('su.user_id', '=', 'ue.user_id');
-          })
-          .join('exercises AS e', 'ue.exercise_id', '=', 'e.exercise_id')
-          .join('workout_exercises AS we', function () {
-            this.on('w.workout_id', '=', 'we.workout_id').andOn('e.exercise_id', '=', 'we.exercise_id');
-          })
-          .where({
-            'su.user_id': 1,
-            'su.is_finished': true
-          })
-          .groupBy('su.session_id', 'w.title', 'su.date_start', 'su.date_end')
-          .orderBy('su.session_id');
-        res.json(data);
+        const params = this.getDefaultQueryOptions(req);
+        const history = await this.workouts.getHistory(params, req.user.user_id)
+        const {totalCount} = await this.workouts.getTotalHistory(req.user.user_id);
+        res.setHeader('x-total-count', totalCount);
+        res.status(200).json(history);
     }
 }
 

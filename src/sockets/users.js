@@ -1,6 +1,9 @@
+import SessionDAL from "../data-access-layer/SessionDAL.js";
+
 class ActiveUsers {
     constructor(io) {
         this.io = io;
+        this.sessions = new SessionDAL();
     }
 
     getActiveUsers = async () => {
@@ -25,27 +28,24 @@ class ActiveUsers {
             socket.emit('active-users:get', players);
         }, 2500)
 
-        socket.on('active-users:invite', ({session, from, toSocketId}) => {
+        socket.on('active-users:invite', ({session, from, to}) => {
             const count = this.io.sockets.adapter.rooms.get(`session#${session.session_id}`)?.size;
-            if(false) {
-                socket.emit('error', {code: 'ERROR_INVITE',response: {data:{error: 'В одной тренировке может участвовать до 5 человек'}}});
+            if(count && count < 5) {
+                this.io.to(to.socketId).emit('active-users:invited', {session, from, to});
             } else {
-                this.io.to(toSocketId).emit('active-users:invited', {session, from, toSocketId});
+                socket.emit('error', {code: 'ERROR_INVITE',response: {data:{error: 'Up to 5 people can participate in one training'}}});    
             }
         });
 
-        socket.on('active-users:accept', async ({session, toSocketId}) => {
+        socket.on('active-users:accept', async ({session, from, to}) => {
             const results = [];
             for(let exercise of session.workout.exercises) {
                 results.push({[exercise.exercise_id]: 0})
             }
+            await this.sessions.addPerson({sessionId: session.session_id, workout: session.workout, userId: socket.user.user_id});
             socket.join(`session#${session.session_id}`);
             socket.emit('session:created', session);
             this.io.to(`session#${session.session_id}`).emit('users:accepted', {...socket.user, results});
-        });
-
-        socket.on('active-users:reject', async ({session, fromSocket}) => {
-            this.io.to(fromSocket).emit('active-users:rejected', {user: socket.user});
         });
     }
 }
