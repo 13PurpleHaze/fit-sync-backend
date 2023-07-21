@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { BadRequest } from "../errors/BadRequest.js";
 import { Unauthorized } from "../errors/Unauthorized.js";
-import 'dotenv/config';
+import { sign } from "../utils/sign.js";
+import "dotenv/config";
 
 class AuthController {
     constructor() {
@@ -30,15 +31,15 @@ class AuthController {
             gender,
         });
 
-        const tokens = this.sign({user_id: user.user_id, role_id: user.role_id, login: user.login});
+        const tokens = sign({user_id: user.user_id, role_id: user.role_id, login: user.login, status: true});
         await broker.pub.hSet('refreshTokens', { [user.user_id]: tokens.refreshToken});
         
-        res.cookie("refreshToken", tokens.refreshToken, {
+        res.cookie('refreshToken', tokens.refreshToken, {
             httpOnly: true,
             secure: false,
             signed: true,
             maxAge: 3 * 24 * 60 * 60 * 1000,
-            path: "/"
+            path: '/'
         })
         res.status(201).json({accessToken: tokens.accessToken});
     }
@@ -58,10 +59,10 @@ class AuthController {
             throw new BadRequest('You are blocked');
         }
 
-        const tokens = this.sign({user_id: user.user_id, role_id: user.role_id, login: user.login, status: user.status});
+        const tokens = sign({user_id: user.user_id, role_id: user.role_id, login: user.login, status: user.status});
         await broker.pub.hSet('refreshTokens', { [user.user_id]: tokens.refreshToken});
         
-        res.cookie("refreshToken", tokens.refreshToken, {
+        res.cookie('refreshToken', tokens.refreshToken, {
             httpOnly: true,
             secure: false,
             signed: true,
@@ -80,28 +81,23 @@ class AuthController {
     refresh = async (req, res) => {
         const {refreshToken} = req.signedCookies;
 
-        console.log(refreshToken, 'refresh')
         if(!refreshToken) {
             throw new Unauthorized();
         }
 
         const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-        console.log(payload);
         if(!payload.status) {
             throw new Unauthorized();
         }
 
         const oldRefreshToken = await broker.pub.hGet('refreshTokens', payload.user_id);
 
-        console.log('old', oldRefreshToken)
-        console.log('tr', refreshToken);
-        
         if(!oldRefreshToken || oldRefreshToken !== refreshToken) {
             throw new Unauthorized();
         }
 
-        const tokens = this.sign({user_id: payload.user_id, role_id: payload.role_id, login: payload.login, status: payload.status});
+        const tokens = sign({user_id: payload.user_id, role_id: payload.role_id, login: payload.login, status: payload.status});
         await broker.pub.hSet('refreshTokens', { [payload.user_id]: tokens.refreshToken});
         
         res.clearCookie('refreshToken');
@@ -110,22 +106,9 @@ class AuthController {
             secure: false,
             signed: true,
             maxAge: 3 * 24 * 60 * 60 * 1000,
-            path: "/"
+            path: '/'
         })
         res.status(201).json({accessToken: tokens.accessToken});
-    }
-
-
-    sign = (payload) => {
-        const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {
-            expiresIn: `${process.env.JWT_ACCESS_EXPITES_IN_MINUTES}m`,
-        });
-    
-        const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
-            expiresIn: `${process.env.JWT_REFRESH_EXPITES_IN_DAYS}d`,
-        })
-
-        return {accessToken, refreshToken};
     }
 }
 

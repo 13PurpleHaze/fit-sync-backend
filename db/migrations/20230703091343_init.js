@@ -53,7 +53,7 @@ export const up = function(knex) {
         })
         .createTable('messages', function (table) {
             table.bigIncrements('message_id');
-            table.bigInteger('session_id').references('session_id').inTable('sessions').notNullable();
+            table.bigInteger('session_id').references('session_id').inTable('sessions').notNullable().onDelete('CASCADE').onUpdate('CASCADE');
             table.bigInteger('user_id').references('user_id').inTable('users').notNullable();
             table.text('text');
             table.timestamps(true, true);

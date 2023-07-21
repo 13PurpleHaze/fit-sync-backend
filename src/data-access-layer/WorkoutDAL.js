@@ -14,9 +14,9 @@ class WorkoutDAL extends BaseDAL {
     
                 const workoutExercises = await Promise.all(
                     data.exercises.map(async (exercise) => {
-                      const [insertedExercise] = await db("workout_exercises")
+                      const [insertedExercise] = await db('workout_exercises')
                         .insert({ exercise_id: exercise[0], workout_id: workout.workout_id, reps: exercise[1] })
-                        .returning("*")
+                        .returning('*')
                         .transacting(trx);
                       return insertedExercise;
                     })
@@ -36,15 +36,15 @@ class WorkoutDAL extends BaseDAL {
     }
 
     get = async ({filters = [], sort = [], limit = 10, page = 1}) => {
-        const query = db("workouts")
-            .join("workout_exercises", "workouts.workout_id", "workout_exercises.workout_id")
-            .join("exercises", "exercises.exercise_id", "workout_exercises.exercise_id")
+        const query = db('workouts')
+            .join('workout_exercises", "workouts.workout_id", "workout_exercises.workout_id')
+            .join('exercises", "exercises.exercise_id", "workout_exercises.exercise_id')
             .select(
-                "workouts.workout_id",
-                "workouts.title",
-                "workouts.user_id",
-                "workouts.created_at",
-                "workouts.updated_at",
+                'workouts.workout_id',
+                'workouts.title',
+                'workouts.user_id',
+                'workouts.created_at',
+                'workouts.updated_at',
                 db.raw(`json_agg(
                             json_build_object(
                                 'exercise_id', exercises.exercise_id,
@@ -54,7 +54,7 @@ class WorkoutDAL extends BaseDAL {
                                 'reps', workout_exercises.reps
                             )) filter (where exercises.exercise_id is not null) as exercises`)
             )
-            .groupBy("workouts.workout_id");
+            .groupBy('workouts.workout_id');
 
         const workouts = await this.getPaginatedFilteredSorted(query, filters, sort, limit, page);
         return workouts;
@@ -81,9 +81,9 @@ class WorkoutDAL extends BaseDAL {
                 data.exercises = Object.entries(data.exercises);
                 const workoutExercises = await Promise.all(
                     data.exercises.map(async (exercise) => {
-                      const [insertedExercise] = await db("workout_exercises")
+                      const [insertedExercise] = await db('workout_exercises')
                         .insert({ exercise_id: exercise[0], workout_id: workout.workout_id, reps: exercise[1] })
-                        .returning("*")
+                        .returning('*')
                         .transacting(trx);
                       return insertedExercise;
                     })
@@ -108,6 +108,47 @@ class WorkoutDAL extends BaseDAL {
 
     getTotal = async () => {
         const [{count}] =  await db('workouts').count();
+        return {totalCount: count};
+    }
+
+    getHistory = async ({filters = [], sort = [], limit = 10, page = 1}, userId) => {
+        const query = db('session_users AS su')
+          .join('sessions AS s', 's.session_id', '=', 'su.session_id')
+          .join('workouts AS w', 's.workout_id', '=', 'w.workout_id')
+          .join('user_exercises AS ue', function () {
+            this.on('su.session_id', '=', 'ue.session_id').andOn('su.user_id', '=', 'ue.user_id');
+          })
+          .join('exercises AS e', 'ue.exercise_id', '=', 'e.exercise_id')
+          .join('workout_exercises AS we', function () {
+            this.on('w.workout_id', '=', 'we.workout_id').andOn('e.exercise_id', '=', 'we.exercise_id');
+          })
+          .where({
+            'su.user_id': userId,
+            'su.is_finished': true
+          })
+          .select(
+            'su.session_id',
+            'su.date_start',
+            'su.date_end',
+            'w.title',
+            db.raw(
+              `json_agg(json_build_object(
+                'title', e.title, 
+                'img', e.img,
+                'user_reps', ue.reps, 
+                'workout_reps', we.reps,
+                'is_static', e.is_static
+                )) AS exercises`
+            )
+          )
+          .groupBy('su.session_id', 'w.title', 'su.date_start', 'su.date_end')
+        const history = await this.getPaginatedFilteredSorted(query, filters, sort, limit, page);
+        return history
+    }
+
+    getTotalHistory = async (userId) => {
+        const [{count}] =  await db('session_users').where({user_id: userId, is_finished: true}).count();
+        console.log(count);
         return {totalCount: count};
     }
 }

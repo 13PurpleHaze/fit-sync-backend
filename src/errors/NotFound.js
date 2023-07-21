@@ -1,5 +1,5 @@
 export class NotFound extends Error {
-    constructor(page) {
-        super(`Page ${page} not found`);
+    constructor(page, method) {
+        super(`Page ${page} not found, with method ${method}`);
     }
 }

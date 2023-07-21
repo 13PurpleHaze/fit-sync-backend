@@ -1,7 +1,7 @@
 import ExerciseDAL from "../data-access-layer/ExerciseDAL.js";
 import BaseContoller from "../base/BaseController.js";
 import YandexS3 from "../services/YandexS3.js";
-import { generateRandomName } from "../utils/generateRandomName.js";
+import { generateRandomName } from "../utils/generate-random-name.js";
 
 class ExerciseController extends BaseContoller {
     constructor() {
@@ -29,7 +29,6 @@ class ExerciseController extends BaseContoller {
         const params = this.getDefaultQueryOptions(req);
         const exercises = await this.exercises.get(params);
         const {totalCount} = await this.exercises.getTotal();
-
         const newExercises = await this.storage.get(exercises);
         res.setHeader('x-total-count', totalCount);
         res.status(200).json(newExercises);

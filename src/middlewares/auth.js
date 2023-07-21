@@ -1,6 +1,6 @@
 import { Unauthorized } from "../errors/Unauthorized.js";
 import jwt from "jsonwebtoken";
-import 'dotenv/config';
+import "dotenv/config";
 
 export const auth = (req, res, next) => {
     const token = req.headers?.authorization;

@@ -13,7 +13,6 @@ class SessionController extends BaseContoller {
         res.status(201).json(session);
     }
 
-
     getUsers = async (req, res) => {
         const sessionId = req.params.id;
         const users = await this.session.getUsers(sessionId);

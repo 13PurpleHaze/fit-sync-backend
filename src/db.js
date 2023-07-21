@@ -1,5 +1,5 @@
 import knex from "knex";
-import 'dotenv/config';
+import "dotenv/config";
 
 export default knex(
 {

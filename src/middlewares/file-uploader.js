@@ -1,6 +1,5 @@
 import moment from "moment";
 import multer from "multer";
-import path from "path";
 import { BadRequest } from "../errors/BadRequest.js";
 
 const storage = multer.memoryStorage()
