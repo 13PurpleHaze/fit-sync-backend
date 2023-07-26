@@ -37,8 +37,8 @@ class WorkoutDAL extends BaseDAL {
 
     get = async ({filters = [], sort = [], limit = 10, page = 1}) => {
         const query = db('workouts')
-            .join('workout_exercises", "workouts.workout_id", "workout_exercises.workout_id')
-            .join('exercises", "exercises.exercise_id", "workout_exercises.exercise_id')
+            .join('workout_exercises', 'workouts.workout_id', 'workout_exercises.workout_id')
+            .join('exercises', 'exercises.exercise_id', 'workout_exercises.exercise_id')
             .select(
                 'workouts.workout_id',
                 'workouts.title',

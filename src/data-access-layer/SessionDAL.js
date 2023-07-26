@@ -36,12 +36,12 @@ class SessionDAL {
             
         const [session] = await db('sessions')
                 .where({workout_id: data.workout_id})
-                .returning("*")
+                .returning('*')
                 .transacting(trx);
 
             const [user] = await db('session_users')
                 .insert({session_id: session.session_id, user_id: data.userId})
-                .returning("*")
+                .returning('*')
                 .transacting(trx);
             
            
@@ -72,7 +72,7 @@ class SessionDAL {
         await db.transaction(async trx => {
             const [user] = await db('session_users')
                 .insert({session_id: sessionId, user_id: userId})
-                .returning("*")
+                .returning('*')
                 .transacting(trx);
             
            
